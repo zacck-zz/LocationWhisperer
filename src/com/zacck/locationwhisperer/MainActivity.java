@@ -34,7 +34,6 @@ import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
-		GooglePlayServicesClient.OnConnectionFailedListener,
 		com.google.android.gms.location.LocationListener {
 	// vars
 	// this code we use to relate with google play services
@@ -73,6 +72,8 @@ public class MainActivity extends ActionBarActivity implements
 	//this is a shared preference module for storing the locations
 	SharedPreferences LocaList;
 	Set<String> prevLocs;
+	
+	LocCallbacks lcb;
 
 	// Define a DialogFragment that displays the error dialog in case of one
 	public static class ErrorDialogFragment extends DialogFragment {
@@ -120,8 +121,8 @@ public class MainActivity extends ActionBarActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		// wohoo let the fun begin
-		LocCallbacks callbacks = new LocCallbacks(MainActivity.this);
-		mLocationClient = new LocationClient(this, this, callbacks);
+		lcb = new LocCallbacks(MainActivity.this);
+		mLocationClient = new LocationClient(this, this, lcb);
 
 		// Create the LocationRequest object
 		mLocationRequest = LocationRequest.create();
@@ -137,7 +138,7 @@ public class MainActivity extends ActionBarActivity implements
 		// Get a SharedPreferences editor
 		mEditor = mPrefs.edit();
 		
-		mLocationClient = new LocationClient(this, this, this);
+		mLocationClient = new LocationClient(this, this,lcb);
 		// Start with updates turned off
 		mUpdatesRequested = false;
 		
