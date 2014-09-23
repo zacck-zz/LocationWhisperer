@@ -19,10 +19,7 @@ public class GetAddress extends AsyncTask<Location, Void, String> {
 		mlocContext = ctx;
 	}
 	
-	@Override
-	protected void onPostExecute(String result) {
-		
-	}
+	
 
 	@Override
 	protected String doInBackground(Location... params) {
@@ -38,9 +35,9 @@ public class GetAddress extends AsyncTask<Location, Void, String> {
 			addresses = geocoder.getFromLocation(loc.getLatitude(),
 					loc.getLongitude(), 1);
 		} catch (IOException e1) {
-			Log.e("LocationSampleActivity", "IO Exception in getFromLocation()");
-			e1.printStackTrace();
-			return ("IO Exception trying to get address");
+			Log.e("LocationSampleActivity", "IO Exception in getFromLocation() "+e1.toString());
+			
+			return ("Address "+e1.toString());
 		} catch (IllegalArgumentException e2) {
 			// Error message to post in the log
 			String errorString = "Illegal arguments "
