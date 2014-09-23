@@ -3,6 +3,7 @@ package com.zacck.locationwhisperer;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
 
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
@@ -10,6 +11,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -22,6 +24,8 @@ public class MainActivity extends ActionBarActivity implements
 	// vars
 	// this code we use to relate with google play services
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+	LocationClient mLocationClient;
+	Location mLocation;
 
 	// Define a DialogFragment that displays the error dialog in case of one
 	public static class ErrorDialogFragment extends DialogFragment {
@@ -98,8 +102,24 @@ public class MainActivity extends ActionBarActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		//wohoo let the fun begin 
+		mLocationClient = new LocationClient(this, this, this);
+		
+		//lets toast a location so them geezers know we are serious 
+		mLocation = mLocationClient.getLastLocation();
+		Toast.makeText(MainActivity.this, mLocation.toString(), Toast.LENGTH_LONG).show();
+		
+		
+		
 	}
 
+	//implement onstop to kill connection client when no longer needed ie when activity is dead 
+	@Override
+	protected void onStop() {
+		//disconnect the connection client to save battery
+		mLocationClient.disconnect();
+		super.onStop();
+	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
