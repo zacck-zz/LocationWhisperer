@@ -4,14 +4,18 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationRequest;
 
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -20,12 +24,33 @@ import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
-		GooglePlayServicesClient.OnConnectionFailedListener {
+		GooglePlayServicesClient.OnConnectionFailedListener,
+		com.google.android.gms.location.LocationListener{
 	// vars
 	// this code we use to relate with google play services
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	LocationClient mLocationClient;
 	Location mLocation;
+	LocationRequest mLocationRequest;
+	boolean mUpdatesRequested;
+	
+	//sharedprefs for getting updates 
+	SharedPreferences mPrefs;
+	SharedPreferences.Editor mEditor;
+	
+	
+	// Milliseconds per second
+    private static final int MILLISECONDS_PER_SECOND = 1000;
+    // Update frequency in seconds
+    public static final int UPDATE_INTERVAL_IN_SECONDS = 5;
+    // Update frequency in milliseconds
+    private static final long UPDATE_INTERVAL =
+            MILLISECONDS_PER_SECOND * UPDATE_INTERVAL_IN_SECONDS;
+    // The fastest update frequency, in seconds
+    private static final int FASTEST_INTERVAL_IN_SECONDS = 1;
+    // A fast frequency ceiling in milliseconds
+    private static final long FASTEST_INTERVAL =
+            MILLISECONDS_PER_SECOND * FASTEST_INTERVAL_IN_SECONDS;
 
 	// Define a DialogFragment that displays the error dialog in case of one
 	public static class ErrorDialogFragment extends DialogFragment {
@@ -105,10 +130,43 @@ public class MainActivity extends ActionBarActivity implements
 		//wohoo let the fun begin 
 		mLocationClient = new LocationClient(this, this, this);
 		
+		// Create the LocationRequest object
+        mLocationRequest = LocationRequest.create();
+        // Use high accuracy
+        mLocationRequest.setPriority(
+                LocationRequest.PRIORITY_HIGH_ACCURACY);
+        // Set the update interval to 5 seconds
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        // Set the fastest update interval to 1 second
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        
+        //vodoo
+     // Open the shared preferences
+        mPrefs = getSharedPreferences("SharedPreferences",
+                Context.MODE_PRIVATE);
+        // Get a SharedPreferences editor
+        mEditor = mPrefs.edit();
+        /*
+         * Create a new location client, using the enclosing class to
+         * handle callbacks.
+         */
+        mLocationClient = new LocationClient(this, this, this);
+        // Start with updates turned off
+        mUpdatesRequested = false;
 		
 		
 		
 		
+		
+	}
+	
+	@Override
+	protected void onPause() {
+		// Save the current setting for updates
+        mEditor.putBoolean("KEY_UPDATES_ON", mUpdatesRequested);
+        mEditor.commit();
+
+		super.onPause();
 	}
 	@Override
 	protected void onStart() {
@@ -116,11 +174,29 @@ public class MainActivity extends ActionBarActivity implements
 		mLocationClient.connect();
 		super.onStart();
 	}
+	
+	@Override
+	protected void onResume() {
+		if (mPrefs.contains("KEY_UPDATES_ON")) {
+            mUpdatesRequested =
+                    mPrefs.getBoolean("KEY_UPDATES_ON", false);
+
+        // Otherwise, turn off location updates
+        } else {
+            mEditor.putBoolean("KEY_UPDATES_ON", false);
+            mEditor.commit();
+        }
+		super.onResume();
+	}
 
 	//implement onstop to kill connection client when no longer needed ie when activity is dead 
 	@Override
 	protected void onStop() {
 		//disconnect the connection client to save battery
+		if(mLocationClient.isConnected())
+		{
+			mLocationClient.removeLocationUpdates(this);
+		}
 		mLocationClient.disconnect();
 		super.onStop();
 	}
@@ -177,6 +253,10 @@ public class MainActivity extends ActionBarActivity implements
 		//lets toast a location so them geezers know we are serious 
 				mLocation = mLocationClient.getLastLocation();
 				Toast.makeText(MainActivity.this, mLocation.toString(), Toast.LENGTH_LONG).show();
+				//if the user wants updates lets give them
+				if (mUpdatesRequested) {
+		            mLocationClient.requestLocationUpdates(mLocationRequest, this);
+		        }
 		
 	}
 
@@ -184,6 +264,17 @@ public class MainActivity extends ActionBarActivity implements
 	public void onDisconnected() {
 		Toast.makeText(this, "Disconnected. Please re-connect.\n Check your internet did you enable location also \n if you are indoors try walking outside and looking at the sun ",
                 Toast.LENGTH_SHORT).show();
+		
+	}
+
+	//lets use this to get when the location is changed
+	@Override
+	public void onLocationChanged(Location loc) {
+		
+		String msg = "Updated Location: " +
+                Double.toString(loc.getLatitude()) + "," +
+                Double.toString(loc.getLongitude());
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 		
 	}
 }
