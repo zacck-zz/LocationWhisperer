@@ -1,8 +1,10 @@
 package com.zacck.locationwhisperer;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -20,8 +22,10 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -72,6 +76,12 @@ public class MainActivity extends ActionBarActivity implements
 	//add some textviews to display data
 	TextView tvacc,tvalt,tvdire,tvspeed;
 	public TextView tvaddr;
+	
+	
+	
+	//this is a shared preference module for storing the locations
+	SharedPreferences LocaList;
+	Set<String> prevLocs;
 
 	// Define a DialogFragment that displays the error dialog in case of one
 	public static class ErrorDialogFragment extends DialogFragment {
@@ -172,8 +182,18 @@ public class MainActivity extends ActionBarActivity implements
 		 */
 		mLocationClient = new LocationClient(this, this, this);
 		// Start with updates turned off
-		mUpdatesRequested = false;
-
+		mUpdatesRequested = true;
+		
+		//for storing locations 
+		LocaList = getPreferences(MODE_PRIVATE);
+		//vodoo hack for storing locations in shared prefrence as a list 
+		prevLocs = LocaList.getStringSet("locs", null);
+		if(prevLocs == null)
+		{
+			prevLocs = new HashSet<String>();
+		}
+		
+;
 		// connect our map to the ui
 		// Get a handle to the Map Fragment
 		mGoogleMap = ((MapFragment) getFragmentManager().findFragmentById(
@@ -234,15 +254,49 @@ public class MainActivity extends ActionBarActivity implements
 		return true;
 	}
 
-	@Override
+	@SuppressLint("NewApi") @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
+		//save and display the locat
+		switch(item.getItemId())
+		{
+		case R.id.action_settings:
+			//list of locs
+			if(prevLocs.isEmpty())
+			{
+				Toast.makeText(MainActivity.this, "no saved locations yet", Toast.LENGTH_LONG).show();
+			}
+			else
+			{
+			String[] locations = prevLocs.toArray(new String[prevLocs.size()]);	
+			AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+		    builder.setTitle("Previous Missile targets")
+		           .setItems(locations, new DialogInterface.OnClickListener() {
+		               public void onClick(DialogInterface dialog, int which) {
+		               // The 'which' argument contains the index position
+		               // of the selected item
+		           }
+		    });
+		    builder.create();
+		    builder.show();
+			}
+			break;
+		case R.id.action_save_location:
+			//put a location in a set then save it 
+			SharedPreferences.Editor locsed = LocaList.edit();
+			if(mLocation !=null)
+			{
+				prevLocs.add(mLocation.toString());
+				locsed.putStringSet("locs", prevLocs);	
+				locsed.commit();
+				Toast.makeText(MainActivity.this, "Current location has been stored", Toast.LENGTH_LONG).show();
+			}
+			else
+			{
+				Toast.makeText(MainActivity.this, "Location hasnt been set yet try later", Toast.LENGTH_LONG).show();
+			}
+			break;
 		}
+		
 		return super.onOptionsItemSelected(item);
 	}
 

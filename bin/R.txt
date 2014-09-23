@@ -335,6 +335,7 @@ int id action_context_bar 0x7f08002f
 int id action_menu_divider 0x7f080028
 int id action_menu_presenter 0x7f080029
 int id action_mode_close_button 0x7f080036
+int id action_save_location 0x7f080055
 int id action_settings 0x7f080054
 int id activity_chooser_view_content 0x7f080037
 int id always 0x7f08001e
@@ -479,6 +480,7 @@ int string common_google_play_services_update_title 0x7f07000c
 int string common_signin_button_text 0x7f070017
 int string common_signin_button_text_long 0x7f070018
 int string hello_world 0x7f070028
+int string save_loc 0x7f07002a
 int string wallet_buy_button_place_holder 0x7f070019
 int style AppBaseTheme 0x7f050090
 int style AppTheme 0x7f050091

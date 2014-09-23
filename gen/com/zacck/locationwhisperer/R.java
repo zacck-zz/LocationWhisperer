@@ -1471,6 +1471,7 @@ containing a value of this type.
         public static final int action_menu_divider=0x7f080028;
         public static final int action_menu_presenter=0x7f080029;
         public static final int action_mode_close_button=0x7f080036;
+        public static final int action_save_location=0x7f080055;
         public static final int action_settings=0x7f080054;
         public static final int activity_chooser_view_content=0x7f080037;
         public static final int always=0x7f08001e;
@@ -1736,6 +1737,7 @@ containing a value of this type.
          */
         public static final int common_signin_button_text_long=0x7f070018;
         public static final int hello_world=0x7f070028;
+        public static final int save_loc=0x7f07002a;
         /**  Text on a placeholder buy button when Google Play services is not
          available or up-to-date 
          */
