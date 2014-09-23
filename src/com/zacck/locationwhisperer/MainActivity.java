@@ -105,12 +105,16 @@ public class MainActivity extends ActionBarActivity implements
 		//wohoo let the fun begin 
 		mLocationClient = new LocationClient(this, this, this);
 		
-		//lets toast a location so them geezers know we are serious 
-		mLocation = mLocationClient.getLastLocation();
-		Toast.makeText(MainActivity.this, mLocation.toString(), Toast.LENGTH_LONG).show();
 		
 		
 		
+		
+	}
+	@Override
+	protected void onStart() {
+		//when the activity actually starts lets connect 
+		mLocationClient.connect();
+		super.onStart();
 	}
 
 	//implement onstop to kill connection client when no longer needed ie when activity is dead 
@@ -170,12 +174,15 @@ public class MainActivity extends ActionBarActivity implements
 	@Override
 	public void onConnected(Bundle arg0) {
 		Toast.makeText(this, "Connected to google Play!!! let the games begin", Toast.LENGTH_SHORT).show();
+		//lets toast a location so them geezers know we are serious 
+				mLocation = mLocationClient.getLastLocation();
+				Toast.makeText(MainActivity.this, mLocation.toString(), Toast.LENGTH_LONG).show();
 		
 	}
 
 	@Override
 	public void onDisconnected() {
-		Toast.makeText(this, "Disconnected. Please re-connect. Check your internet did you enable location",
+		Toast.makeText(this, "Disconnected. Please re-connect.\n Check your internet did you enable location also \n if you are indoors try walking outside and looking at the sun ",
                 Toast.LENGTH_SHORT).show();
 		
 	}
