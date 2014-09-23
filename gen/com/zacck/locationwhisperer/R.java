@@ -1460,7 +1460,6 @@ containing a value of this type.
         public static final int powered_by_google_light=0x7f020075;
     }
     public static final class id {
-        public static final int Alt=0x7f080052;
         public static final int action_bar=0x7f08002e;
         public static final int action_bar_activity_content=0x7f080027;
         public static final int action_bar_container=0x7f08002d;
@@ -1472,7 +1471,7 @@ containing a value of this type.
         public static final int action_menu_divider=0x7f080028;
         public static final int action_menu_presenter=0x7f080029;
         public static final int action_mode_close_button=0x7f080036;
-        public static final int action_settings=0x7f080055;
+        public static final int action_settings=0x7f080054;
         public static final int activity_chooser_view_content=0x7f080037;
         public static final int always=0x7f08001e;
         public static final int beginning=0x7f080023;
@@ -1540,8 +1539,8 @@ containing a value of this type.
         public static final int tvAccu=0x7f08004f;
         public static final int tvAlt=0x7f080050;
         public static final int tvBea=0x7f080051;
-        public static final int tvSpe=0x7f080053;
-        public static final int tvaddr=0x7f080054;
+        public static final int tvSpe=0x7f080052;
+        public static final int tvaddr=0x7f080053;
         public static final int up=0x7f080033;
         public static final int useLogo=0x7f080016;
         public static final int withText=0x7f08001f;

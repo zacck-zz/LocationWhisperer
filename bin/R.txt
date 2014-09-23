@@ -324,7 +324,6 @@ int drawable ic_plusone_standard_off_client 0x7f020072
 int drawable ic_plusone_tall_off_client 0x7f020073
 int drawable powered_by_google_dark 0x7f020074
 int drawable powered_by_google_light 0x7f020075
-int id Alt 0x7f080052
 int id action_bar 0x7f08002e
 int id action_bar_activity_content 0x7f080027
 int id action_bar_container 0x7f08002d
@@ -336,7 +335,7 @@ int id action_context_bar 0x7f08002f
 int id action_menu_divider 0x7f080028
 int id action_menu_presenter 0x7f080029
 int id action_mode_close_button 0x7f080036
-int id action_settings 0x7f080055
+int id action_settings 0x7f080054
 int id activity_chooser_view_content 0x7f080037
 int id always 0x7f08001e
 int id beginning 0x7f080023
@@ -404,8 +403,8 @@ int id top_action_bar 0x7f080032
 int id tvAccu 0x7f08004f
 int id tvAlt 0x7f080050
 int id tvBea 0x7f080051
-int id tvSpe 0x7f080053
-int id tvaddr 0x7f080054
+int id tvSpe 0x7f080052
+int id tvaddr 0x7f080053
 int id up 0x7f080033
 int id useLogo 0x7f080016
 int id withText 0x7f08001f

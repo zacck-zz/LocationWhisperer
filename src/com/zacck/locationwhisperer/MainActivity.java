@@ -1,5 +1,9 @@
 package com.zacck.locationwhisperer;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -21,12 +25,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity implements
@@ -60,6 +68,10 @@ public class MainActivity extends ActionBarActivity implements
 
 	// lets add map stuff
 	GoogleMap mGoogleMap;
+	
+	//add some textviews to display data
+	TextView tvacc,tvalt,tvdire,tvspeed;
+	public TextView tvaddr;
 
 	// Define a DialogFragment that displays the error dialog in case of one
 	public static class ErrorDialogFragment extends DialogFragment {
@@ -166,6 +178,11 @@ public class MainActivity extends ActionBarActivity implements
 		// Get a handle to the Map Fragment
 		mGoogleMap = ((MapFragment) getFragmentManager().findFragmentById(
 				R.id.map)).getMap();
+		tvacc = (TextView)findViewById(R.id.tvAccu);
+		tvaddr = (TextView)findViewById(R.id.tvaddr);
+		tvalt = (TextView)findViewById(R.id.tvAlt);
+		tvdire = (TextView)findViewById(R.id.tvBea);
+		tvspeed = (TextView)findViewById(R.id.tvSpe);
 
 	}
 
@@ -263,13 +280,21 @@ public class MainActivity extends ActionBarActivity implements
 				Toast.LENGTH_SHORT).show();
 		// lets toast a location so them geezers know we are serious
 		mLocation = mLocationClient.getLastLocation();
-		// Toast.makeText(MainActivity.this, mLocation.toString(),
-		// Toast.LENGTH_LONG).show();
-		LatLng pos = new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
+		
+		//populate the info texts
+		GetAddress ga = new GetAddress(MainActivity.this);
+		ga.execute(mLocation);
+		tvacc.setText("Accurate to "+mLocation.getAccuracy()+" metres");
+		tvalt.setText("Altitude of "+mLocation.getAltitude()+" metres");
+		tvdire.setText("heading in a "+mLocation.getBearing()+" direction");
+		tvspeed.setText(mLocation.getSpeed()+" metres/second");
+		LatLng pos = new LatLng(mLocation.getLatitude(),
+				mLocation.getLongitude());
 		mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 13));
 
 		mGoogleMap.addMarker(new MarkerOptions().title("Current Location")
-				.snippet("Please stay stationary as we aim missile").position(pos));
+				.snippet("Please stay stationary as we aim missile")
+				.position(pos));
 		// if the user wants updates lets give them
 		if (mUpdatesRequested) {
 			mLocationClient.requestLocationUpdates(mLocationRequest, this);
@@ -293,15 +318,90 @@ public class MainActivity extends ActionBarActivity implements
 		String msg = "Updated Location: " + Double.toString(loc.getLatitude())
 				+ "," + Double.toString(loc.getLongitude());
 		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-		LatLng pos = new LatLng(loc.getLatitude(),loc.getLongitude());
+		LatLng pos = new LatLng(loc.getLatitude(), loc.getLongitude());
+		//populate the info texts
+				GetAddress ga = new GetAddress(MainActivity.this);
+				ga.execute(loc);
+				tvacc.setText("Accurate to "+loc.getAccuracy()+" metres");
+				tvalt.setText("Altitude of "+loc.getAltitude()+" metres");
+				tvdire.setText("heading in a "+loc.getBearing()+" direction");
+				tvspeed.setText(loc.getSpeed()+" metres/second");
 		mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 13));
 
 		mGoogleMap.addMarker(new MarkerOptions().title("Current Location")
-				.snippet("Please stay stationary as we aim missile").position(pos));
+				.snippet("Please stay stationary as we aim missile")
+				.position(pos));
 		// if the user wants updates lets give them
 		if (mUpdatesRequested) {
 			mLocationClient.requestLocationUpdates(mLocationRequest, this);
 		}
 
 	}
+	
+	public class GetAddress extends AsyncTask<Location, Void, String> {
+		Context mlocContext;
+
+		public GetAddress(Context ctx) {
+			super();
+			mlocContext = ctx;
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			tvaddr.setText(result);
+		}
+
+		@Override
+		protected String doInBackground(Location... params) {
+			Geocoder geocoder = new Geocoder(mlocContext, Locale.getDefault());
+			// Get the current location from the input parameter list
+			Location loc = params[0];
+			// Create a list to contain the result address
+			List<Address> addresses = null;
+			try {
+				/*
+				 * Return 1 address.
+				 */
+				addresses = geocoder.getFromLocation(loc.getLatitude(),
+						loc.getLongitude(), 1);
+			} catch (IOException e1) {
+				Log.e("LocationSampleActivity", "IO Exception in getFromLocation() "+e1.toString());
+				
+				return ("Address "+e1.toString());
+			} catch (IllegalArgumentException e2) {
+				// Error message to post in the log
+				String errorString = "Illegal arguments "
+						+ Double.toString(loc.getLatitude()) + " , "
+						+ Double.toString(loc.getLongitude())
+						+ " passed to address service";
+				Log.e("LocationSampleActivity", errorString);
+				e2.printStackTrace();
+				return errorString;
+			}
+			// If the reverse geocode returned an address
+			if (addresses != null && addresses.size() > 0) {
+				// Get the first address
+				Address address = addresses.get(0);
+				/*
+				 * Format the first line of address (if available), city, and
+				 * country name.
+				 */
+				String addressText = String.format(
+						"%s, %s, %s",
+						// If there's a street address, add it
+						address.getMaxAddressLineIndex() > 0 ? address
+								.getAddressLine(0) : "",
+						// Locality is usually a city
+						address.getLocality(),
+						// The country of the address
+						address.getCountryName());
+				// Return the text
+				return addressText;
+			} else {
+				return "No address found";
+			}
+		}
+	}
+
+
 }
