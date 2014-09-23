@@ -1,15 +1,10 @@
 package com.zacck.locationwhisperer;
 
-import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.internal.hy;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -29,11 +24,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -129,7 +120,8 @@ public class MainActivity extends ActionBarActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		// wohoo let the fun begin
-		mLocationClient = new LocationClient(this, this, this);
+		LocCallbacks callbacks = new LocCallbacks(MainActivity.this);
+		mLocationClient = new LocationClient(this, this, callbacks);
 
 		// Create the LocationRequest object
 		mLocationRequest = LocationRequest.create();
@@ -140,18 +132,14 @@ public class MainActivity extends ActionBarActivity implements
 		// Set the fastest update interval to 1 second
 		mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
 
-		// vodoo
 		// Open the shared preferences
 		mPrefs = getSharedPreferences("SharedPreferences", Context.MODE_PRIVATE);
 		// Get a SharedPreferences editor
 		mEditor = mPrefs.edit();
-		/*
-		 * Create a new location client, using the enclosing class to handle
-		 * callbacks.
-		 */
+		
 		mLocationClient = new LocationClient(this, this, this);
 		// Start with updates turned off
-		mUpdatesRequested = true;
+		mUpdatesRequested = false;
 		
 		//for storing locations 
 		LocaList = getPreferences(MODE_PRIVATE);
@@ -269,33 +257,7 @@ public class MainActivity extends ActionBarActivity implements
 		return super.onOptionsItemSelected(item);
 	}
 
-	// these are the connection callbacks
-
-	@Override
-	public void onConnectionFailed(ConnectionResult connectionResult) {
-		if (connectionResult.hasResolution()) {
-			try {
-				// Start an Activity that tries to resolve the error
-				connectionResult.startResolutionForResult(this,
-						CONNECTION_FAILURE_RESOLUTION_REQUEST);
-				/*
-				 * Thrown if Google Play services canceled the original
-				 * PendingIntent
-				 */
-			} catch (IntentSender.SendIntentException e) {
-				// Log the error
-				e.printStackTrace();
-			}
-		} else {
-			/*
-			 * If no resolution is available, display a dialog to the user with
-			 * the error.
-			 */
-			Toast.makeText(MainActivity.this, connectionResult.getErrorCode(),
-					Toast.LENGTH_LONG).show();
-		}
-
-	}
+	
 
 	@Override
 	public void onConnected(Bundle arg0) {
