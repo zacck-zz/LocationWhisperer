@@ -293,6 +293,15 @@ public class MainActivity extends ActionBarActivity implements
 		String msg = "Updated Location: " + Double.toString(loc.getLatitude())
 				+ "," + Double.toString(loc.getLongitude());
 		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+		LatLng pos = new LatLng(loc.getLatitude(),loc.getLongitude());
+		mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 13));
+
+		mGoogleMap.addMarker(new MarkerOptions().title("Current Location")
+				.snippet("Please stay stationary as we aim missile").position(pos));
+		// if the user wants updates lets give them
+		if (mUpdatesRequested) {
+			mLocationClient.requestLocationUpdates(mLocationRequest, this);
+		}
 
 	}
 }

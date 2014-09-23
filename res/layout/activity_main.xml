@@ -10,4 +10,43 @@
           android:layout_height="match_parent"
           android:name="com.google.android.gms.maps.MapFragment"/>
 
+    <TextView
+        android:id="@+id/tvAccu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+         />
+
+    <TextView
+        android:id="@+id/tvAlt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/tvAccu"
+        />
+
+    <TextView
+        android:id="@+id/tvBea"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/Alt"
+        />
+
+    <TextView
+        android:id="@+id/tvSpe"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/tvBea"
+       />
+    <TextView
+        android:id="@+id/tvaddr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/tvSpe"
+       />
+
 </RelativeLayout>
