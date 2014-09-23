@@ -1,6 +1,7 @@
 package com.zacck.locationwhisperer;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import android.support.v4.app.DialogFragment;
@@ -8,12 +9,16 @@ import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements
+		GooglePlayServicesClient.ConnectionCallbacks,
+		GooglePlayServicesClient.OnConnectionFailedListener {
 	// vars
 	// this code we use to relate with google play services
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
@@ -112,5 +117,46 @@ public class MainActivity extends ActionBarActivity {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	//these are the connection callbacks
+	
+	@Override
+	public void onConnectionFailed(ConnectionResult connectionResult) {
+		if (connectionResult.hasResolution()) {
+            try {
+                // Start an Activity that tries to resolve the error
+                connectionResult.startResolutionForResult(
+                        this,
+                        CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                /*
+                 * Thrown if Google Play services canceled the original
+                 * PendingIntent
+                 */
+            } catch (IntentSender.SendIntentException e) {
+                // Log the error
+                e.printStackTrace();
+            }
+        } else {
+            /*
+             * If no resolution is available, display a dialog to the
+             * user with the error.
+             */
+           Toast.makeText(MainActivity.this, connectionResult.getErrorCode(),Toast.LENGTH_LONG).show();
+        }
+		
+	}
+
+	@Override
+	public void onConnected(Bundle arg0) {
+		Toast.makeText(this, "Connected to google Play!!! let the games begin", Toast.LENGTH_SHORT).show();
+		
+	}
+
+	@Override
+	public void onDisconnected() {
+		Toast.makeText(this, "Disconnected. Please re-connect. Check your internet did you enable location",
+                Toast.LENGTH_SHORT).show();
+		
 	}
 }
