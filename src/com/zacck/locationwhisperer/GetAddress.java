@@ -1,6 +1,5 @@
 package com.zacck.locationwhisperer;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,19 +33,16 @@ public class GetAddress extends AsyncTask<Location, Void, String> {
 			 */
 			addresses = geocoder.getFromLocation(loc.getLatitude(),
 					loc.getLongitude(), 1);
-		} catch (IOException e1) {
-			Log.e("LocationSampleActivity", "IO Exception in getFromLocation() "+e1.toString());
-			
-			return ("Address "+e1.toString());
-		} catch (IllegalArgumentException e2) {
+		} catch (Exception  e) {
 			// Error message to post in the log
 			String errorString = "Illegal arguments "
 					+ Double.toString(loc.getLatitude()) + " , "
 					+ Double.toString(loc.getLongitude())
 					+ " passed to address service";
 			Log.e("LocationSampleActivity", errorString);
-			e2.printStackTrace();
-			return errorString;
+			e.printStackTrace();
+			
+			return "Wow Seems An error occured";
 		}
 		// If the reverse geocode returned an address
 		if (addresses != null && addresses.size() > 0) {

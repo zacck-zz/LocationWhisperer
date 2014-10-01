@@ -3,7 +3,6 @@ package com.zacck.locationwhisperer;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationRequest;
@@ -22,7 +21,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
@@ -62,17 +60,15 @@ public class MainActivity extends ActionBarActivity implements
 
 	// lets add map stuff
 	GoogleMap mGoogleMap;
-	
-	//add some textviews to display data
-	TextView tvacc,tvalt,tvdire,tvspeed;
+
+	// add some textviews to display data
+	TextView tvacc, tvalt, tvdire, tvspeed;
 	public TextView tvaddr;
-	
-	
-	
-	//this is a shared preference module for storing the locations
+
+	// this is a shared preference module for storing the locations
 	SharedPreferences LocaList;
 	Set<String> prevLocs;
-	
+
 	LocCallbacks lcb;
 
 	// Define a DialogFragment that displays the error dialog in case of one
@@ -113,8 +109,6 @@ public class MainActivity extends ActionBarActivity implements
 		}
 	}
 
-
-
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -137,39 +131,40 @@ public class MainActivity extends ActionBarActivity implements
 		mPrefs = getSharedPreferences("SharedPreferences", Context.MODE_PRIVATE);
 		// Get a SharedPreferences editor
 		mEditor = mPrefs.edit();
-		
-		mLocationClient = new LocationClient(this, this,lcb);
+
+		mLocationClient = new LocationClient(this, this, lcb);
 		// Start with updates turned off
 		mUpdatesRequested = false;
-		
-		//for storing locations 
+
+		// for storing locations
 		LocaList = getPreferences(MODE_PRIVATE);
-		//vodoo hack for storing locations in shared prefrence as a list 
+		// vodoo hack for storing locations in shared prefrence as a list
 		prevLocs = LocaList.getStringSet("locs", null);
-		if(prevLocs == null)
-		{
+		if (prevLocs == null) {
 			prevLocs = new HashSet<String>();
 		}
-		
-;
-		// connect our map to the ui
+
 		// Get a handle to the Map Fragment
 		mGoogleMap = ((MapFragment) getFragmentManager().findFragmentById(
 				R.id.map)).getMap();
-		tvacc = (TextView)findViewById(R.id.tvAccu);
-		tvaddr = (TextView)findViewById(R.id.tvaddr);
-		tvalt = (TextView)findViewById(R.id.tvAlt);
-		tvdire = (TextView)findViewById(R.id.tvBea);
-		tvspeed = (TextView)findViewById(R.id.tvSpe);
+		tvacc = (TextView) findViewById(R.id.tvAccu);
+		tvaddr = (TextView) findViewById(R.id.tvaddr);
+		tvalt = (TextView) findViewById(R.id.tvAlt);
+		tvdire = (TextView) findViewById(R.id.tvBea);
+		tvspeed = (TextView) findViewById(R.id.tvSpe);
 
 	}
 
 	@Override
 	protected void onPause() {
+		// disconnect the connection client to save battery
+		if (mLocationClient.isConnected()) {
+			mLocationClient.removeLocationUpdates(this);
+		}
+		mLocationClient.disconnect();
 		// Save the current setting for updates
 		mEditor.putBoolean("KEY_UPDATES_ON", mUpdatesRequested);
 		mEditor.commit();
-
 		super.onPause();
 	}
 
@@ -182,6 +177,8 @@ public class MainActivity extends ActionBarActivity implements
 
 	@Override
 	protected void onResume() {
+		
+		mLocationClient.connect();
 		if (mPrefs.contains("KEY_UPDATES_ON")) {
 			mUpdatesRequested = mPrefs.getBoolean("KEY_UPDATES_ON", false);
 
@@ -212,53 +209,54 @@ public class MainActivity extends ActionBarActivity implements
 		return true;
 	}
 
-	@SuppressLint("NewApi") @Override
+	@SuppressLint("NewApi")
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		//save and display the locat
-		switch(item.getItemId())
-		{
+		// save and display the locat
+		switch (item.getItemId()) {
 		case R.id.action_settings:
-			//list of locs
-			if(prevLocs.isEmpty())
-			{
-				Toast.makeText(MainActivity.this, "no saved locations yet", Toast.LENGTH_LONG).show();
-			}
-			else
-			{
-			String[] locations = prevLocs.toArray(new String[prevLocs.size()]);	
-			AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-		    builder.setTitle("Previous Missile targets")
-		           .setItems(locations, new DialogInterface.OnClickListener() {
-		               public void onClick(DialogInterface dialog, int which) {
-		               // The 'which' argument contains the index position
-		               // of the selected item
-		           }
-		    });
-		    builder.create();
-		    builder.show();
+			// list of locs
+			if (prevLocs.isEmpty()) {
+				Toast.makeText(MainActivity.this, "no saved locations yet",
+						Toast.LENGTH_LONG).show();
+			} else {
+				String[] locations = prevLocs.toArray(new String[prevLocs
+						.size()]);
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						MainActivity.this);
+				builder.setTitle("Previous Missile targets").setItems(
+						locations, new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int which) {
+								// The 'which' argument contains the index
+								// position
+								// of the selected item
+							}
+						});
+				builder.create();
+				builder.show();
 			}
 			break;
 		case R.id.action_save_location:
-			//put a location in a set then save it 
+			// put a location in a set then save it
 			SharedPreferences.Editor locsed = LocaList.edit();
-			if(mLocation !=null)
-			{
+			if (mLocation != null) {
 				prevLocs.add(mLocation.toString());
-				locsed.putStringSet("locs", prevLocs);	
+				locsed.putStringSet("locs", prevLocs);
 				locsed.commit();
-				Toast.makeText(MainActivity.this, "Current location has been stored", Toast.LENGTH_LONG).show();
-			}
-			else
-			{
-				Toast.makeText(MainActivity.this, "Location hasnt been set yet try later", Toast.LENGTH_LONG).show();
+				Toast.makeText(MainActivity.this,
+						"Current location has been stored", Toast.LENGTH_LONG)
+						.show();
+			} else {
+				Toast.makeText(MainActivity.this,
+						"Location hasnt been set yet try later",
+						Toast.LENGTH_LONG).show();
 			}
 			break;
 		}
-		
+
 		return super.onOptionsItemSelected(item);
 	}
-
-	
 
 	@Override
 	public void onConnected(Bundle arg0) {
@@ -266,23 +264,20 @@ public class MainActivity extends ActionBarActivity implements
 				Toast.LENGTH_SHORT).show();
 		// lets toast a location so them geezers know we are serious
 		mLocation = mLocationClient.getLastLocation();
-		
-		//populate the info texts
+
+		// populate the info texts
 		GetAddress ga = new GetAddress(MainActivity.this);
-		try
-		{
-			String add  = ga.execute(mLocation).get();
+		try {
+			String add = ga.execute(mLocation).get();
 			tvaddr.setText(add);
-			
-		}
-		catch(Exception e)
-		{
+
+		} catch (Exception e) {
 			Log.d("EX", e.toString());
 		}
-		tvacc.setText("Accurate to "+mLocation.getAccuracy()+" metres");
-		tvalt.setText("Altitude of "+mLocation.getAltitude()+" metres");
-		tvdire.setText("heading in a "+mLocation.getBearing()+" direction");
-		tvspeed.setText(mLocation.getSpeed()+" metres/second");
+		tvacc.setText("Accurate to " + mLocation.getAccuracy() + " metres");
+		tvalt.setText("Altitude of " + mLocation.getAltitude() + " metres");
+		tvdire.setText("heading in a " + mLocation.getBearing() + " direction");
+		tvspeed.setText(mLocation.getSpeed() + " metres/second");
 		LatLng pos = new LatLng(mLocation.getLatitude(),
 				mLocation.getLongitude());
 		mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 13));
@@ -314,22 +309,19 @@ public class MainActivity extends ActionBarActivity implements
 				+ "," + Double.toString(loc.getLongitude());
 		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 		LatLng pos = new LatLng(loc.getLatitude(), loc.getLongitude());
-		//populate the info texts
-				GetAddress ga = new GetAddress(MainActivity.this);
-				try
-				{
-					String add  = ga.execute(loc).get();
-					tvaddr.setText(add);
-					
-				}
-				catch(Exception e)
-				{
-					Log.d("EX", e.toString());
-				}
-				tvacc.setText("Accurate to "+loc.getAccuracy()+" metres");
-				tvalt.setText("Altitude of "+loc.getAltitude()+" metres");
-				tvdire.setText("heading in a "+loc.getBearing()+" direction");
-				tvspeed.setText(loc.getSpeed()+" metres/second");
+		// populate the info texts
+		GetAddress ga = new GetAddress(MainActivity.this);
+		try {
+			String add = ga.execute(loc).get();
+			tvaddr.setText(add);
+
+		} catch (Exception e) {
+			Log.d("EX", e.toString());
+		}
+		tvacc.setText("Accurate to " + loc.getAccuracy() + " metres");
+		tvalt.setText("Altitude of " + loc.getAltitude() + " metres");
+		tvdire.setText("heading in a " + loc.getBearing() + " direction");
+		tvspeed.setText(loc.getSpeed() + " metres/second");
 		mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 13));
 
 		mGoogleMap.addMarker(new MarkerOptions().title("Current Location")
@@ -341,8 +333,5 @@ public class MainActivity extends ActionBarActivity implements
 		}
 
 	}
-	
-	
-
 
 }
